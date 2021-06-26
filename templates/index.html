@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HoshDB - a hash database</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+</head>
+<body>
+    <h1>HoshDB - <small>a hash database</small></h1>
+    <hr>
+    <input type="search" name="word" style="width: 100%;"
+           placeholder="enter word to hash" id="word" required>
+    <br><br>
+    <table style="width: 100%">
+        <thead>
+            <tr>
+                <th style="text-align:left">type</th>
+                <th style="text-align:left">hash</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+    <script>
+        const esc = encodeURIComponent;
+        const resEl = document.querySelector("#res");
+        const wordEl = document.querySelector("#word");
+        const tableBody = document.querySelector("#tableBody");
+        wordEl.addEventListener('search', async (event) => {
+            event.preventDefault();
+            const word = wordEl.value;
+            const params = { word };
+            const q = Object.keys(params)
+                      .map(k => esc(k) + "=" + esc(params[k]))
+                      .join("&");
+            const response = await fetch(`/search?${q}`);
+            const data = await response.json();
+            Object.keys(data).map(
+                hashType => {
+                    if (!(hashType === '_id' || hashType === 'timestamp')) {
+                        const appendedRow = tableBody.insertRow();
+                        appendedRow.innerHTML = `
+                            <td>${hashType}</td>
+                            <td><input style="width: 90%;" onClick="this.select();" value="${data[hashType]}" readonly></td>`
+                    }
+                }
+            )
+        });
+    </script>
+</body>
+</html>
